@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/iamkirkbater/mealie-markdown-exporter/pkg/apitoken"
+	"github.com/iamkirkbater/mealie-markdown-exporter/pkg/outputdirectory"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
@@ -18,6 +19,9 @@ var exportCmd = &cobra.Command{
 		if viper.GetString("base-url") == "" {
 			return fmt.Errorf("base-url is required (set via --base-url flag or MME_BASE_URL env var)")
 		}
+		if err := resolveOutputDir(); err != nil {
+			return err
+		}
 		err := resolveAPIToken(cmd)
 		if err != nil {
 			return err
@@ -29,6 +33,10 @@ var exportCmd = &cobra.Command{
 		log.Info("Exporting from: ", baseURL)
 		return nil
 	},
+}
+
+func resolveOutputDir() error {
+	return outputdirectory.Resolve(afero.NewOsFs(), viper.GetString("output-dir"))
 }
 
 func resolveAPIToken(cmd *cobra.Command) error {
@@ -51,5 +59,6 @@ func resolveAPIToken(cmd *cobra.Command) error {
 func init() {
 	exportCmd.Flags().String("base-url", "", "Base URL of the Mealie instance")
 	exportCmd.Flags().String("api-token", "", "API token for the Mealie instance")
+	exportCmd.Flags().String("output-dir", outputdirectory.DefaultOutputDir, "Directory to export markdown files to")
 	rootCmd.AddCommand(exportCmd)
 }
