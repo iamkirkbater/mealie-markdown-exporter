@@ -1,49 +1,49 @@
 ---
-title: "{{ escapeQuotes .Title }}"
-{{- if .Description }}
-description: "{{ escapeQuotes .Description }}"
+title: "{{ .Recipe.Name | escapeQuotes }}"
+{{- if .Recipe.Description }}
+description: "{{ .Recipe.Description | escapeQuotes }}"
 {{- end }}
-{{- if .DateAdded }}
-date: {{ .DateAdded }}
+{{- if .Recipe.DateAdded }}
+date: {{ .Recipe.DateAdded }}
 {{- end }}
-{{- if .DateUpdated }}
-lastmod: {{ .DateUpdated }}
+{{- if .Recipe.DateUpdated }}
+lastmod: {{ .Recipe.DateUpdated }}
 {{- end }}
-{{- if .Categories }}
+{{- if .Recipe.RecipeCategory }}
 categories:
-{{- range .Categories }}
+{{- range categoryNames .Recipe.RecipeCategory }}
   - "{{ . }}"
 {{- end }}
 {{- end }}
-{{- if .Tags }}
+{{- if .Recipe.Tags }}
 tags:
-{{- range .Tags }}
+{{- range tagNames .Recipe.Tags }}
   - "{{ . }}"
 {{- end }}
 {{- end }}
-{{- if .PrepTime }}
-prep_time: "{{ .PrepTime }}"
+{{- if .Recipe.PrepTime }}
+prep_time: "{{ .Recipe.PrepTime }}"
 {{- end }}
-{{- if .CookTime }}
-cook_time: "{{ .CookTime }}"
+{{- if .Recipe.CookTime }}
+cook_time: "{{ .Recipe.CookTime }}"
 {{- end }}
-{{- if .TotalTime }}
-total_time: "{{ .TotalTime }}"
+{{- if .Recipe.TotalTime }}
+total_time: "{{ .Recipe.TotalTime }}"
 {{- end }}
-{{- if .Servings }}
-servings: {{ .Servings }}
+{{- if .Recipe.RecipeServings }}
+servings: {{ .Recipe.RecipeServings }}
 {{- end }}
-{{- if .Rating }}
-rating: {{ .Rating }}
+{{- if .Recipe.Rating }}
+rating: {{ .Recipe.Rating }}
 {{- end }}
-{{- if .OrgURL }}
-source_url: "{{ .OrgURL }}"
+{{- if .Recipe.OrgURL }}
+source_url: "{{ .Recipe.OrgURL }}"
 {{- end }}
 ---
 
-# {{ escapeQuotes .Title }}
+# {{ .Recipe.Name | escapeQuotes }}
 
-{{- if .Description }}
+{{- if .Recipe.Description }}
 
-{{ escapeQuotes .Description }}
+{{ .Recipe.Description | escapeQuotes }}
 {{- end }}

@@ -33,31 +33,31 @@ type PaginatedResponse struct {
 }
 
 type Recipe struct {
-	ID                 *string          `json:"id"`
-	UserID             string           `json:"userId"`
-	HouseholdID        string           `json:"householdId"`
-	GroupID            string           `json:"groupId"`
-	Name               *string          `json:"name"`
-	Slug               string           `json:"slug"`
-	Image              interface{}      `json:"image"`
-	RecipeServings     float64          `json:"recipeServings"`
-	RecipeYieldQuantity float64         `json:"recipeYieldQuantity"`
-	RecipeYield        *string          `json:"recipeYield"`
-	TotalTime          *string          `json:"totalTime"`
-	PrepTime           *string          `json:"prepTime"`
-	CookTime           *string          `json:"cookTime"`
-	PerformTime        *string          `json:"performTime"`
-	Description        *string          `json:"description"`
-	RecipeCategory     []RecipeCategory `json:"recipeCategory"`
-	Tags               []RecipeTag      `json:"tags"`
-	Tools              []RecipeTool     `json:"tools"`
-	Rating             *float64         `json:"rating"`
-	OrgURL             *string          `json:"orgURL"`
-	DateAdded          *string          `json:"dateAdded"`
-	DateUpdated        *string          `json:"dateUpdated"`
-	CreatedAt          *string          `json:"createdAt"`
-	UpdatedAt          *string          `json:"updatedAt"`
-	LastMade           *string          `json:"lastMade"`
+	ID                  string           `json:"id"`
+	UserID              string           `json:"userId"`
+	HouseholdID         string           `json:"householdId"`
+	GroupID             string           `json:"groupId"`
+	Name                string           `json:"name"`
+	Slug                string           `json:"slug"`
+	Image               interface{}      `json:"image"`
+	RecipeServings      float64          `json:"recipeServings"`
+	RecipeYieldQuantity float64          `json:"recipeYieldQuantity"`
+	RecipeYield         string           `json:"recipeYield"`
+	TotalTime           string           `json:"totalTime"`
+	PrepTime            string           `json:"prepTime"`
+	CookTime            string           `json:"cookTime"`
+	PerformTime         string           `json:"performTime"`
+	Description         string           `json:"description"`
+	RecipeCategory      []RecipeCategory `json:"recipeCategory"`
+	Tags                []RecipeTag      `json:"tags"`
+	Tools               []RecipeTool     `json:"tools"`
+	Rating              float64          `json:"rating"`
+	OrgURL              string           `json:"orgURL"`
+	DateAdded           string           `json:"dateAdded"`
+	DateUpdated         string           `json:"dateUpdated"`
+	CreatedAt           string           `json:"createdAt"`
+	UpdatedAt           string           `json:"updatedAt"`
+	LastMade            string           `json:"lastMade"`
 }
 
 type RecipeCategory struct {

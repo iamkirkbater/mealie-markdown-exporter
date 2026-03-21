@@ -8,9 +8,6 @@ import (
 	"github.com/spf13/afero"
 )
 
-func strPtr(s string) *string { return &s }
-func floatPtr(f float64) *float64 { return &f }
-
 var _ = Describe("WriteRecipes", func() {
 	var fs afero.Fs
 
@@ -21,8 +18,8 @@ var _ = Describe("WriteRecipes", func() {
 
 	It("writes a markdown file for each recipe", func() {
 		recipes := []mealie.Recipe{
-			{Name: strPtr("Pancakes"), Slug: "pancakes"},
-			{Name: strPtr("Waffles"), Slug: "waffles"},
+			{Name: "Pancakes", Slug: "pancakes"},
+			{Name: "Waffles", Slug: "waffles"},
 		}
 
 		err := markdown.WriteRecipes(fs, "/output", recipes)
@@ -36,7 +33,7 @@ var _ = Describe("WriteRecipes", func() {
 
 	It("includes the title in the front matter and body", func() {
 		recipes := []mealie.Recipe{
-			{Name: strPtr("Chocolate Cake"), Slug: "chocolate-cake"},
+			{Name: "Chocolate Cake", Slug: "chocolate-cake"},
 		}
 
 		err := markdown.WriteRecipes(fs, "/output", recipes)
@@ -51,9 +48,9 @@ var _ = Describe("WriteRecipes", func() {
 	It("includes description when present", func() {
 		recipes := []mealie.Recipe{
 			{
-				Name:        strPtr("Soup"),
+				Name:        "Soup",
 				Slug:        "soup",
-				Description: strPtr("A warm bowl of soup"),
+				Description: "A warm bowl of soup",
 			},
 		}
 
@@ -68,7 +65,7 @@ var _ = Describe("WriteRecipes", func() {
 	It("includes categories and tags", func() {
 		recipes := []mealie.Recipe{
 			{
-				Name: strPtr("Tacos"),
+				Name: "Tacos",
 				Slug: "tacos",
 				RecipeCategory: []mealie.RecipeCategory{
 					{Name: "Dinner", Slug: "dinner"},
@@ -93,11 +90,11 @@ var _ = Describe("WriteRecipes", func() {
 	It("includes time fields when present", func() {
 		recipes := []mealie.Recipe{
 			{
-				Name:      strPtr("Bread"),
+				Name:      "Bread",
 				Slug:      "bread",
-				PrepTime:  strPtr("20 minutes"),
-				CookTime:  strPtr("45 minutes"),
-				TotalTime: strPtr("1 hour 5 minutes"),
+				PrepTime:  "20 minutes",
+				CookTime:  "45 minutes",
+				TotalTime: "1 hour 5 minutes",
 			},
 		}
 
@@ -114,10 +111,10 @@ var _ = Describe("WriteRecipes", func() {
 	It("includes rating and source URL when present", func() {
 		recipes := []mealie.Recipe{
 			{
-				Name:   strPtr("Pizza"),
+				Name:   "Pizza",
 				Slug:   "pizza",
-				Rating: floatPtr(4.5),
-				OrgURL: strPtr("https://example.com/pizza"),
+				Rating: 4.5,
+				OrgURL: "https://example.com/pizza",
 			},
 		}
 
@@ -133,9 +130,9 @@ var _ = Describe("WriteRecipes", func() {
 	It("escapes quotes in the description", func() {
 		recipes := []mealie.Recipe{
 			{
-				Name:        strPtr("Mom's \"Best\" Cookies"),
+				Name:        "Mom's \"Best\" Cookies",
 				Slug:        "moms-best-cookies",
-				Description: strPtr(`A recipe for "the best" cookies`),
+				Description: `A recipe for "the best" cookies`,
 			},
 		}
 
@@ -150,7 +147,7 @@ var _ = Describe("WriteRecipes", func() {
 
 	It("omits optional fields when not present", func() {
 		recipes := []mealie.Recipe{
-			{Name: strPtr("Simple"), Slug: "simple"},
+			{Name: "Simple", Slug: "simple"},
 		}
 
 		err := markdown.WriteRecipes(fs, "/output", recipes)
