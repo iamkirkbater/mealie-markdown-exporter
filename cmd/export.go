@@ -5,6 +5,7 @@ import (
 
 	"github.com/iamkirkbater/mealie-markdown-exporter/pkg/apitoken"
 	"github.com/iamkirkbater/mealie-markdown-exporter/pkg/outputdirectory"
+	"github.com/iamkirkbater/mealie-markdown-exporter/pkg/provider/mealie"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
@@ -30,7 +31,17 @@ var exportCmd = &cobra.Command{
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		baseURL := viper.GetString("base-url")
+		apiToken := viper.GetString("api-token")
+
 		log.Info("Exporting from: ", baseURL)
+
+		client := mealie.NewClient(baseURL, apiToken)
+		recipes, err := client.GetAllRecipes()
+		if err != nil {
+			return err
+		}
+
+		log.Infof("Retrieved %d recipes", len(recipes))
 		return nil
 	},
 }
