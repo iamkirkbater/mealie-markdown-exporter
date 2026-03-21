@@ -5,6 +5,7 @@ import (
 
 	"github.com/iamkirkbater/mealie-markdown-exporter/pkg/apitoken"
 	"github.com/iamkirkbater/mealie-markdown-exporter/pkg/outputdirectory"
+	"github.com/iamkirkbater/mealie-markdown-exporter/pkg/provider/markdown"
 	"github.com/iamkirkbater/mealie-markdown-exporter/pkg/provider/mealie"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/afero"
@@ -42,6 +43,13 @@ var exportCmd = &cobra.Command{
 		}
 
 		log.Infof("Retrieved %d recipes", len(recipes))
+
+		outputDir := viper.GetString("output-dir")
+		if err := markdown.WriteRecipes(afero.NewOsFs(), outputDir, recipes); err != nil {
+			return err
+		}
+
+		log.Infof("Exported %d recipes to %s", len(recipes), outputDir)
 		return nil
 	},
 }

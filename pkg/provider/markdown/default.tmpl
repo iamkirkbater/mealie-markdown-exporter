@@ -1,0 +1,49 @@
+---
+title: "{{ escapeQuotes .Title }}"
+{{- if .Description }}
+description: "{{ escapeQuotes .Description }}"
+{{- end }}
+{{- if .DateAdded }}
+date: {{ .DateAdded }}
+{{- end }}
+{{- if .DateUpdated }}
+lastmod: {{ .DateUpdated }}
+{{- end }}
+{{- if .Categories }}
+categories:
+{{- range .Categories }}
+  - "{{ . }}"
+{{- end }}
+{{- end }}
+{{- if .Tags }}
+tags:
+{{- range .Tags }}
+  - "{{ . }}"
+{{- end }}
+{{- end }}
+{{- if .PrepTime }}
+prep_time: "{{ .PrepTime }}"
+{{- end }}
+{{- if .CookTime }}
+cook_time: "{{ .CookTime }}"
+{{- end }}
+{{- if .TotalTime }}
+total_time: "{{ .TotalTime }}"
+{{- end }}
+{{- if .Servings }}
+servings: {{ .Servings }}
+{{- end }}
+{{- if .Rating }}
+rating: {{ .Rating }}
+{{- end }}
+{{- if .OrgURL }}
+source_url: "{{ .OrgURL }}"
+{{- end }}
+---
+
+# {{ escapeQuotes .Title }}
+
+{{- if .Description }}
+
+{{ escapeQuotes .Description }}
+{{- end }}
