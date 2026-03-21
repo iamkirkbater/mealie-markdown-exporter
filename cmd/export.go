@@ -37,12 +37,22 @@ var exportCmd = &cobra.Command{
 		log.Info("Exporting from: ", baseURL)
 
 		client := mealie.NewClient(baseURL, apiToken)
-		recipes, err := client.GetAllRecipes()
+		recipeSummaries, err := client.GetAllRecipes()
 		if err != nil {
 			return err
 		}
 
-		log.Infof("Retrieved %d recipes", len(recipes))
+		log.Infof("Found %d recipes, fetching full details...", len(recipeSummaries))
+
+		var recipes []mealie.Recipe
+		for i, summary := range recipeSummaries {
+			log.Debugf("Fetching recipe %d/%d: %s", i+1, len(recipeSummaries), summary.Slug)
+			recipe, err := client.GetRecipe(summary.Slug)
+			if err != nil {
+				return fmt.Errorf("failed to fetch recipe %q: %w", summary.Slug, err)
+			}
+			recipes = append(recipes, *recipe)
+		}
 
 		outputDir := viper.GetString("output-dir")
 		if err := markdown.WriteRecipes(afero.NewOsFs(), outputDir, recipes); err != nil {

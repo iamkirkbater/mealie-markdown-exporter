@@ -38,6 +38,15 @@ var funcMap = template.FuncMap{
 		}
 		return names
 	},
+	"add": func(a, b int) int {
+		return a + b
+	},
+	"hasNutrition": func(n mealie.Nutrition) bool {
+		return n.Calories != "" || n.CarbohydrateContent != "" || n.ProteinContent != "" ||
+			n.FatContent != "" || n.SaturatedFatContent != "" || n.UnsaturatedFatContent != "" ||
+			n.TransFatContent != "" || n.CholesterolContent != "" || n.SodiumContent != "" ||
+			n.FiberContent != "" || n.SugarContent != ""
+	},
 }
 
 // WriteRecipes renders each recipe as a markdown file and writes it to the output directory.

@@ -51,13 +51,17 @@ type Recipe struct {
 	RecipeCategory      []RecipeCategory `json:"recipeCategory"`
 	Tags                []RecipeTag      `json:"tags"`
 	Tools               []RecipeTool     `json:"tools"`
-	Rating              float64          `json:"rating"`
-	OrgURL              string           `json:"orgURL"`
-	DateAdded           string           `json:"dateAdded"`
-	DateUpdated         string           `json:"dateUpdated"`
-	CreatedAt           string           `json:"createdAt"`
-	UpdatedAt           string           `json:"updatedAt"`
-	LastMade            string           `json:"lastMade"`
+	Rating              float64              `json:"rating"`
+	OrgURL              string               `json:"orgURL"`
+	DateAdded           string               `json:"dateAdded"`
+	DateUpdated         string               `json:"dateUpdated"`
+	CreatedAt           string               `json:"createdAt"`
+	UpdatedAt           string               `json:"updatedAt"`
+	LastMade            string               `json:"lastMade"`
+	RecipeIngredient    []RecipeIngredient    `json:"recipeIngredient"`
+	RecipeInstructions  []RecipeInstruction   `json:"recipeInstructions"`
+	Nutrition           Nutrition             `json:"nutrition"`
+	Notes               []RecipeNote          `json:"notes"`
 }
 
 type RecipeCategory struct {
@@ -78,6 +82,40 @@ type RecipeTool struct {
 	ID   string `json:"id"`
 	Name string `json:"name"`
 	Slug string `json:"slug"`
+}
+
+type RecipeIngredient struct {
+	Quantity     float64 `json:"quantity"`
+	Note         string  `json:"note"`
+	Display      string  `json:"display"`
+	Title        string  `json:"title"`
+	OriginalText string  `json:"originalText"`
+}
+
+type RecipeInstruction struct {
+	ID      string `json:"id"`
+	Title   string `json:"title"`
+	Summary string `json:"summary"`
+	Text    string `json:"text"`
+}
+
+type RecipeNote struct {
+	Title string `json:"title"`
+	Text  string `json:"text"`
+}
+
+type Nutrition struct {
+	Calories             string `json:"calories"`
+	CarbohydrateContent  string `json:"carbohydrateContent"`
+	CholesterolContent   string `json:"cholesterolContent"`
+	FatContent           string `json:"fatContent"`
+	FiberContent         string `json:"fiberContent"`
+	ProteinContent       string `json:"proteinContent"`
+	SaturatedFatContent  string `json:"saturatedFatContent"`
+	SodiumContent        string `json:"sodiumContent"`
+	SugarContent         string `json:"sugarContent"`
+	TransFatContent      string `json:"transFatContent"`
+	UnsaturatedFatContent string `json:"unsaturatedFatContent"`
 }
 
 func (c *Client) GetAllRecipes() ([]Recipe, error) {
@@ -108,6 +146,36 @@ func (c *Client) GetAllRecipes() ([]Recipe, error) {
 
 	log.Debugf("Fetched %d total recipes", len(allRecipes))
 	return allRecipes, nil
+}
+
+// GetRecipe fetches the full recipe details by slug.
+func (c *Client) GetRecipe(slug string) (*Recipe, error) {
+	url := fmt.Sprintf("%s/api/recipes/%s", c.baseURL, slug)
+
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+	req.Header.Set("Authorization", "Bearer "+c.apiToken)
+	req.Header.Set("Accept", "application/json")
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("request failed: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		return nil, fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(body))
+	}
+
+	var recipe Recipe
+	if err := json.NewDecoder(resp.Body).Decode(&recipe); err != nil {
+		return nil, fmt.Errorf("failed to decode response: %w", err)
+	}
+
+	return &recipe, nil
 }
 
 func (c *Client) getRecipesPage(page int) (*PaginatedResponse, error) {

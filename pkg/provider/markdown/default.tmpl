@@ -1,7 +1,7 @@
 ---
 title: "{{ .Recipe.Name | escapeQuotes }}"
 {{- if .Recipe.Description }}
-description: "{{ .Recipe.Description | escapeQuotes }}"
+summary: "{{ .Recipe.Description | escapeQuotes }}"
 {{- end }}
 {{- if .Recipe.DateAdded }}
 date: {{ .Recipe.DateAdded }}
@@ -21,29 +21,95 @@ tags:
   - "{{ . }}"
 {{- end }}
 {{- end }}
-{{- if .Recipe.PrepTime }}
-prep_time: "{{ .Recipe.PrepTime }}"
-{{- end }}
-{{- if .Recipe.CookTime }}
-cook_time: "{{ .Recipe.CookTime }}"
-{{- end }}
-{{- if .Recipe.TotalTime }}
-total_time: "{{ .Recipe.TotalTime }}"
-{{- end }}
-{{- if .Recipe.RecipeServings }}
-servings: {{ .Recipe.RecipeServings }}
-{{- end }}
-{{- if .Recipe.Rating }}
-rating: {{ .Recipe.Rating }}
-{{- end }}
-{{- if .Recipe.OrgURL }}
-source_url: "{{ .Recipe.OrgURL }}"
-{{- end }}
 ---
-
-# {{ .Recipe.Name | escapeQuotes }}
 
 {{- if .Recipe.Description }}
 
 {{ .Recipe.Description | escapeQuotes }}
+{{- end }}
+
+{{- if .Recipe.PrepTime }}
+*Prep Time*: "{{ .Recipe.PrepTime }}"
+{{- end }}
+{{- if .Recipe.CookTime }}
+*Cook Time*: "{{ .Recipe.CookTime }}"
+{{- end }}
+{{- if .Recipe.TotalTime }}
+*Total Time*: "{{ .Recipe.TotalTime }}"
+{{- end }}
+{{- if .Recipe.RecipeServings }}
+*Servings*: {{ .Recipe.RecipeServings }}
+{{- end }}
+{{- if .Recipe.Rating }}
+*Rating*: {{ .Recipe.Rating }}
+{{- end }}
+
+{{- if .Recipe.RecipeIngredient }}
+
+## Ingredients
+
+{{ range .Recipe.RecipeIngredient -}}
+{{- if .Title }}
+### {{ .Title }}
+
+{{ end -}}
+- {{ .Display }}
+{{ end -}}
+{{- end }}
+
+{{- if .Recipe.RecipeInstructions }}
+
+## Instructions
+
+{{ range $i, $step := .Recipe.RecipeInstructions -}}
+{{- if $step.Title }}
+### {{ $step.Title }}
+
+{{ end -}}
+{{ add $i 1 }}. {{ $step.Text }}
+{{ end -}}
+{{- end }}
+
+{{- if .Recipe.Notes }}
+
+## Notes
+
+{{ range .Recipe.Notes -}}
+{{- if .Title }}**{{ .Title }}:** {{ end }}{{ .Text }}
+
+{{ end -}}
+{{- end }}
+
+{{- if hasNutrition .Recipe.Nutrition }}
+
+## Nutrition
+
+{{ with .Recipe.Nutrition -}}
+{{- if .Calories }}- Calories: {{ .Calories }}
+{{ end -}}
+{{- if .CarbohydrateContent }}- Carbohydrates: {{ .CarbohydrateContent }}
+{{ end -}}
+{{- if .ProteinContent }}- Protein: {{ .ProteinContent }}
+{{ end -}}
+{{- if .FatContent }}- Fat: {{ .FatContent }}
+{{ end -}}
+{{- if .SaturatedFatContent }}- Saturated Fat: {{ .SaturatedFatContent }}
+{{ end -}}
+{{- if .UnsaturatedFatContent }}- Unsaturated Fat: {{ .UnsaturatedFatContent }}
+{{ end -}}
+{{- if .TransFatContent }}- Trans Fat: {{ .TransFatContent }}
+{{ end -}}
+{{- if .CholesterolContent }}- Cholesterol: {{ .CholesterolContent }}
+{{ end -}}
+{{- if .SodiumContent }}- Sodium: {{ .SodiumContent }}
+{{ end -}}
+{{- if .FiberContent }}- Fiber: {{ .FiberContent }}
+{{ end -}}
+{{- if .SugarContent }}- Sugar: {{ .SugarContent }}
+{{ end -}}
+{{- end -}}
+{{- end }}
+
+{{- if .Recipe.OrgURL }}
+*Recipe Source*: "{{ .Recipe.OrgURL }}"
 {{- end }}
