@@ -29,19 +29,19 @@ tags:
 {{- end }}
 
 {{- if .Recipe.PrepTime }}
-*Prep Time*: "{{ .Recipe.PrepTime }}"
+- **Prep Time**: {{ .Recipe.PrepTime }}
 {{- end }}
 {{- if .Recipe.CookTime }}
-*Cook Time*: "{{ .Recipe.CookTime }}"
+- **Cook Time**: {{ .Recipe.CookTime }}
 {{- end }}
 {{- if .Recipe.TotalTime }}
-*Total Time*: "{{ .Recipe.TotalTime }}"
+- **Total Time**: {{ .Recipe.TotalTime }}
 {{- end }}
 {{- if .Recipe.RecipeServings }}
-*Servings*: {{ .Recipe.RecipeServings }}
+- **Servings**: {{ .Recipe.RecipeServings }}
 {{- end }}
 {{- if .Recipe.Rating }}
-*Rating*: {{ .Recipe.Rating }}
+- **Rating**: {{ .Recipe.Rating }}
 {{- end }}
 
 {{- if .Recipe.RecipeIngredient }}
