@@ -54,8 +54,17 @@ var exportCmd = &cobra.Command{
 			recipes = append(recipes, *recipe)
 		}
 
+		var opts []markdown.Option
+		if templateFile := viper.GetString("template"); templateFile != "" {
+			opts = append(opts, markdown.WithTemplateFilePath(templateFile))
+		}
+		mdProvider, err := markdown.NewProvider(opts...)
+		if err != nil {
+			return err
+		}
+
 		outputDir := viper.GetString("output-dir")
-		if err := markdown.WriteRecipes(afero.NewOsFs(), outputDir, recipes); err != nil {
+		if err := mdProvider.WriteRecipes(afero.NewOsFs(), outputDir, recipes); err != nil {
 			return err
 		}
 
@@ -89,5 +98,6 @@ func init() {
 	exportCmd.Flags().String("base-url", "", "Base URL of the Mealie instance")
 	exportCmd.Flags().String("api-token", "", "API token for the Mealie instance")
 	exportCmd.Flags().String("output-dir", outputdirectory.DefaultOutputDir, "Directory to export markdown files to")
+	exportCmd.Flags().String("template", "", "Path to a custom Go template file for rendering recipes")
 	rootCmd.AddCommand(exportCmd)
 }

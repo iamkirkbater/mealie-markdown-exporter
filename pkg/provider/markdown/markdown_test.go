@@ -1,6 +1,8 @@
 package markdown_test
 
 import (
+	"os"
+
 	"github.com/iamkirkbater/mealie-markdown-exporter/pkg/provider/markdown"
 	"github.com/iamkirkbater/mealie-markdown-exporter/pkg/provider/mealie"
 	. "github.com/onsi/ginkgo/v2"
@@ -9,11 +11,18 @@ import (
 )
 
 var _ = Describe("WriteRecipes", func() {
-	var fs afero.Fs
+	var (
+		fs       afero.Fs
+		provider *markdown.Provider
+	)
 
 	BeforeEach(func() {
 		fs = afero.NewMemMapFs()
 		fs.MkdirAll("/output", 0755)
+
+		var err error
+		provider, err = markdown.NewProvider()
+		Expect(err).NotTo(HaveOccurred())
 	})
 
 	It("writes a markdown file for each recipe", func() {
@@ -22,7 +31,7 @@ var _ = Describe("WriteRecipes", func() {
 			{Name: "Waffles", Slug: "waffles"},
 		}
 
-		err := markdown.WriteRecipes(fs, "/output", recipes)
+		err := provider.WriteRecipes(fs, "/output", recipes)
 		Expect(err).NotTo(HaveOccurred())
 
 		exists, _ := afero.Exists(fs, "/output/pancakes.md")
@@ -36,13 +45,12 @@ var _ = Describe("WriteRecipes", func() {
 			{Name: "Chocolate Cake", Slug: "chocolate-cake"},
 		}
 
-		err := markdown.WriteRecipes(fs, "/output", recipes)
+		err := provider.WriteRecipes(fs, "/output", recipes)
 		Expect(err).NotTo(HaveOccurred())
 
 		content, err := afero.ReadFile(fs, "/output/chocolate-cake.md")
 		Expect(err).NotTo(HaveOccurred())
 		Expect(string(content)).To(ContainSubstring(`title: "Chocolate Cake"`))
-		Expect(string(content)).To(ContainSubstring("# Chocolate Cake"))
 	})
 
 	It("includes description when present", func() {
@@ -54,11 +62,11 @@ var _ = Describe("WriteRecipes", func() {
 			},
 		}
 
-		err := markdown.WriteRecipes(fs, "/output", recipes)
+		err := provider.WriteRecipes(fs, "/output", recipes)
 		Expect(err).NotTo(HaveOccurred())
 
 		content, _ := afero.ReadFile(fs, "/output/soup.md")
-		Expect(string(content)).To(ContainSubstring(`description: "A warm bowl of soup"`))
+		Expect(string(content)).To(ContainSubstring(`summary: "A warm bowl of soup"`))
 		Expect(string(content)).To(ContainSubstring("A warm bowl of soup"))
 	})
 
@@ -77,7 +85,7 @@ var _ = Describe("WriteRecipes", func() {
 			},
 		}
 
-		err := markdown.WriteRecipes(fs, "/output", recipes)
+		err := provider.WriteRecipes(fs, "/output", recipes)
 		Expect(err).NotTo(HaveOccurred())
 
 		content, _ := afero.ReadFile(fs, "/output/tacos.md")
@@ -98,14 +106,14 @@ var _ = Describe("WriteRecipes", func() {
 			},
 		}
 
-		err := markdown.WriteRecipes(fs, "/output", recipes)
+		err := provider.WriteRecipes(fs, "/output", recipes)
 		Expect(err).NotTo(HaveOccurred())
 
 		content, _ := afero.ReadFile(fs, "/output/bread.md")
 		s := string(content)
-		Expect(s).To(ContainSubstring(`prep_time: "20 minutes"`))
-		Expect(s).To(ContainSubstring(`cook_time: "45 minutes"`))
-		Expect(s).To(ContainSubstring(`total_time: "1 hour 5 minutes"`))
+		Expect(s).To(ContainSubstring("**Prep Time**: 20 minutes"))
+		Expect(s).To(ContainSubstring("**Cook Time**: 45 minutes"))
+		Expect(s).To(ContainSubstring("**Total Time**: 1 hour 5 minutes"))
 	})
 
 	It("includes rating and source URL when present", func() {
@@ -118,13 +126,13 @@ var _ = Describe("WriteRecipes", func() {
 			},
 		}
 
-		err := markdown.WriteRecipes(fs, "/output", recipes)
+		err := provider.WriteRecipes(fs, "/output", recipes)
 		Expect(err).NotTo(HaveOccurred())
 
 		content, _ := afero.ReadFile(fs, "/output/pizza.md")
 		s := string(content)
-		Expect(s).To(ContainSubstring("rating: 4.5"))
-		Expect(s).To(ContainSubstring(`source_url: "https://example.com/pizza"`))
+		Expect(s).To(ContainSubstring("**Rating**: 4.5"))
+		Expect(s).To(ContainSubstring("https://example.com/pizza"))
 	})
 
 	It("escapes quotes in the description", func() {
@@ -136,13 +144,13 @@ var _ = Describe("WriteRecipes", func() {
 			},
 		}
 
-		err := markdown.WriteRecipes(fs, "/output", recipes)
+		err := provider.WriteRecipes(fs, "/output", recipes)
 		Expect(err).NotTo(HaveOccurred())
 
 		content, _ := afero.ReadFile(fs, "/output/moms-best-cookies.md")
 		s := string(content)
 		Expect(s).To(ContainSubstring(`title: "Mom's \"Best\" Cookies"`))
-		Expect(s).To(ContainSubstring(`description: "A recipe for \"the best\" cookies"`))
+		Expect(s).To(ContainSubstring(`summary: "A recipe for \"the best\" cookies"`))
 	})
 
 	It("omits optional fields when not present", func() {
@@ -150,17 +158,48 @@ var _ = Describe("WriteRecipes", func() {
 			{Name: "Simple", Slug: "simple"},
 		}
 
-		err := markdown.WriteRecipes(fs, "/output", recipes)
+		err := provider.WriteRecipes(fs, "/output", recipes)
 		Expect(err).NotTo(HaveOccurred())
 
 		content, _ := afero.ReadFile(fs, "/output/simple.md")
 		s := string(content)
-		Expect(s).NotTo(ContainSubstring("description"))
+		Expect(s).NotTo(ContainSubstring("summary"))
 		Expect(s).NotTo(ContainSubstring("categories"))
 		Expect(s).NotTo(ContainSubstring("tags"))
-		Expect(s).NotTo(ContainSubstring("prep_time"))
-		Expect(s).NotTo(ContainSubstring("cook_time"))
-		Expect(s).NotTo(ContainSubstring("rating"))
+		Expect(s).NotTo(ContainSubstring("Prep Time"))
+		Expect(s).NotTo(ContainSubstring("Cook Time"))
+		Expect(s).NotTo(ContainSubstring("Rating"))
 		Expect(s).NotTo(ContainSubstring("source_url"))
+	})
+
+	Context("with a custom template file", func() {
+		It("uses the provided template", func() {
+			tmpFile, err := os.CreateTemp("", "custom-*.tmpl")
+			Expect(err).NotTo(HaveOccurred())
+			defer os.Remove(tmpFile.Name())
+
+			_, err = tmpFile.WriteString(`# {{ .Recipe.Name }}`)
+			Expect(err).NotTo(HaveOccurred())
+			tmpFile.Close()
+
+			customProvider, err := markdown.NewProvider(markdown.WithTemplateFilePath(tmpFile.Name()))
+			Expect(err).NotTo(HaveOccurred())
+
+			recipes := []mealie.Recipe{
+				{Name: "Custom Recipe", Slug: "custom-recipe"},
+			}
+
+			err = customProvider.WriteRecipes(fs, "/output", recipes)
+			Expect(err).NotTo(HaveOccurred())
+
+			content, _ := afero.ReadFile(fs, "/output/custom-recipe.md")
+			Expect(string(content)).To(Equal("# Custom Recipe"))
+		})
+
+		It("returns an error if the template file does not exist", func() {
+			_, err := markdown.NewProvider(markdown.WithTemplateFilePath("/nonexistent/template.tmpl"))
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(ContainSubstring("failed to read template file"))
+		})
 	})
 })

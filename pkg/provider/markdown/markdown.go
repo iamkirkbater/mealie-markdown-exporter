@@ -4,6 +4,7 @@ import (
 	"bytes"
 	_ "embed"
 	"fmt"
+	"os"
 	"path/filepath"
 	"strings"
 	"text/template"
@@ -49,9 +50,38 @@ var funcMap = template.FuncMap{
 	},
 }
 
+type Provider struct {
+	templateContent string
+}
+
+type Option func(*Provider) error
+
+func WithTemplateFilePath(path string) Option {
+	return func(p *Provider) error {
+		data, err := os.ReadFile(path)
+		if err != nil {
+			return fmt.Errorf("failed to read template file %q: %w", path, err)
+		}
+		p.templateContent = string(data)
+		return nil
+	}
+}
+
+func NewProvider(opts ...Option) (*Provider, error) {
+	p := &Provider{
+		templateContent: defaultTemplate,
+	}
+	for _, opt := range opts {
+		if err := opt(p); err != nil {
+			return nil, err
+		}
+	}
+	return p, nil
+}
+
 // WriteRecipes renders each recipe as a markdown file and writes it to the output directory.
-func WriteRecipes(fs afero.Fs, outputDir string, recipes []mealie.Recipe) error {
-	tmpl, err := template.New("recipe").Funcs(funcMap).Parse(defaultTemplate)
+func (p *Provider) WriteRecipes(fs afero.Fs, outputDir string, recipes []mealie.Recipe) error {
+	tmpl, err := template.New("recipe").Funcs(funcMap).Parse(p.templateContent)
 	if err != nil {
 		return fmt.Errorf("failed to parse template: %w", err)
 	}
