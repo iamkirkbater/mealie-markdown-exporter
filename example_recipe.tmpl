@@ -15,6 +15,9 @@ categories:
   - "{{ . }}"
 {{- end }}
 {{- end }}
+{{- if .ImagePath }}
+image: "/posts/{{ .ImagePath }}"
+{{- end }}
 {{- if .Recipe.Tags }}
 tags:
 {{- range tagNames .Recipe.Tags }}

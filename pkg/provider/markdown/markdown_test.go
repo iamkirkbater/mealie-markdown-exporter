@@ -31,7 +31,7 @@ var _ = Describe("WriteRecipes", func() {
 			{Name: "Waffles", Slug: "waffles"},
 		}
 
-		err := provider.WriteRecipes(fs, "/output", recipes)
+		err := provider.WriteRecipes(fs, "/output", recipes, nil)
 		Expect(err).NotTo(HaveOccurred())
 
 		exists, _ := afero.Exists(fs, "/output/pancakes.md")
@@ -45,7 +45,7 @@ var _ = Describe("WriteRecipes", func() {
 			{Name: "Chocolate Cake", Slug: "chocolate-cake"},
 		}
 
-		err := provider.WriteRecipes(fs, "/output", recipes)
+		err := provider.WriteRecipes(fs, "/output", recipes, nil)
 		Expect(err).NotTo(HaveOccurred())
 
 		content, err := afero.ReadFile(fs, "/output/chocolate-cake.md")
@@ -62,7 +62,7 @@ var _ = Describe("WriteRecipes", func() {
 			},
 		}
 
-		err := provider.WriteRecipes(fs, "/output", recipes)
+		err := provider.WriteRecipes(fs, "/output", recipes, nil)
 		Expect(err).NotTo(HaveOccurred())
 
 		content, _ := afero.ReadFile(fs, "/output/soup.md")
@@ -85,7 +85,7 @@ var _ = Describe("WriteRecipes", func() {
 			},
 		}
 
-		err := provider.WriteRecipes(fs, "/output", recipes)
+		err := provider.WriteRecipes(fs, "/output", recipes, nil)
 		Expect(err).NotTo(HaveOccurred())
 
 		content, _ := afero.ReadFile(fs, "/output/tacos.md")
@@ -106,7 +106,7 @@ var _ = Describe("WriteRecipes", func() {
 			},
 		}
 
-		err := provider.WriteRecipes(fs, "/output", recipes)
+		err := provider.WriteRecipes(fs, "/output", recipes, nil)
 		Expect(err).NotTo(HaveOccurred())
 
 		content, _ := afero.ReadFile(fs, "/output/bread.md")
@@ -126,7 +126,7 @@ var _ = Describe("WriteRecipes", func() {
 			},
 		}
 
-		err := provider.WriteRecipes(fs, "/output", recipes)
+		err := provider.WriteRecipes(fs, "/output", recipes, nil)
 		Expect(err).NotTo(HaveOccurred())
 
 		content, _ := afero.ReadFile(fs, "/output/pizza.md")
@@ -144,7 +144,7 @@ var _ = Describe("WriteRecipes", func() {
 			},
 		}
 
-		err := provider.WriteRecipes(fs, "/output", recipes)
+		err := provider.WriteRecipes(fs, "/output", recipes, nil)
 		Expect(err).NotTo(HaveOccurred())
 
 		content, _ := afero.ReadFile(fs, "/output/moms-best-cookies.md")
@@ -158,7 +158,7 @@ var _ = Describe("WriteRecipes", func() {
 			{Name: "Simple", Slug: "simple"},
 		}
 
-		err := provider.WriteRecipes(fs, "/output", recipes)
+		err := provider.WriteRecipes(fs, "/output", recipes, nil)
 		Expect(err).NotTo(HaveOccurred())
 
 		content, _ := afero.ReadFile(fs, "/output/simple.md")
@@ -170,6 +170,31 @@ var _ = Describe("WriteRecipes", func() {
 		Expect(s).NotTo(ContainSubstring("Cook Time"))
 		Expect(s).NotTo(ContainSubstring("Rating"))
 		Expect(s).NotTo(ContainSubstring("source_url"))
+	})
+
+	It("includes image path in front matter when provided", func() {
+		recipes := []mealie.Recipe{
+			{Name: "Pancakes", Slug: "pancakes"},
+		}
+		images := map[string]string{"pancakes": "pancakes.webp"}
+
+		err := provider.WriteRecipes(fs, "/output", recipes, images)
+		Expect(err).NotTo(HaveOccurred())
+
+		content, _ := afero.ReadFile(fs, "/output/pancakes.md")
+		Expect(string(content)).To(ContainSubstring(`image: "pancakes.webp"`))
+	})
+
+	It("omits image from front matter when not provided", func() {
+		recipes := []mealie.Recipe{
+			{Name: "Pancakes", Slug: "pancakes"},
+		}
+
+		err := provider.WriteRecipes(fs, "/output", recipes, nil)
+		Expect(err).NotTo(HaveOccurred())
+
+		content, _ := afero.ReadFile(fs, "/output/pancakes.md")
+		Expect(string(content)).NotTo(ContainSubstring("image:"))
 	})
 
 	Context("with a custom template file", func() {
@@ -189,7 +214,7 @@ var _ = Describe("WriteRecipes", func() {
 				{Name: "Custom Recipe", Slug: "custom-recipe"},
 			}
 
-			err = customProvider.WriteRecipes(fs, "/output", recipes)
+			err = customProvider.WriteRecipes(fs, "/output", recipes, nil)
 			Expect(err).NotTo(HaveOccurred())
 
 			content, _ := afero.ReadFile(fs, "/output/custom-recipe.md")

@@ -178,6 +178,39 @@ func (c *Client) GetRecipe(slug string) (*Recipe, error) {
 	return &recipe, nil
 }
 
+// GetRecipeImage downloads the original image for a recipe by its ID.
+// Returns the image bytes, or nil if no image is available (404).
+func (c *Client) GetRecipeImage(recipeID string) ([]byte, error) {
+	url := fmt.Sprintf("%s/api/media/recipes/%s/images/original.webp", c.baseURL, recipeID)
+
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+	req.Header.Set("Authorization", "Bearer "+c.apiToken)
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("request failed: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == http.StatusNotFound {
+		return nil, nil
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("unexpected status %d fetching image for recipe %s", resp.StatusCode, recipeID)
+	}
+
+	data, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read image data: %w", err)
+	}
+
+	return data, nil
+}
+
 func (c *Client) getRecipesPage(page int) (*PaginatedResponse, error) {
 	url := fmt.Sprintf("%s/api/recipes?page=%d&perPage=50", c.baseURL, page)
 

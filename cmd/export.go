@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"path/filepath"
 
 	"github.com/iamkirkbater/mealie-markdown-exporter/pkg/apitoken"
 	"github.com/iamkirkbater/mealie-markdown-exporter/pkg/outputdirectory"
@@ -64,7 +65,33 @@ var exportCmd = &cobra.Command{
 		}
 
 		outputDir := viper.GetString("output-dir")
-		if err := mdProvider.WriteRecipes(afero.NewOsFs(), outputDir, recipes); err != nil {
+		fs := afero.NewOsFs()
+
+		images := make(map[string]string)
+		for _, recipe := range recipes {
+			if recipe.ID == "" {
+				continue
+			}
+			imageData, err := client.GetRecipeImage(recipe.ID)
+			if err != nil {
+				log.Warnf("Failed to download image for %q: %v", recipe.Slug, err)
+				continue
+			}
+			if imageData == nil {
+				log.Debugf("No image available for %q", recipe.Slug)
+				continue
+			}
+			imageFile := recipe.Slug + ".webp"
+			imagePath := filepath.Join(outputDir, imageFile)
+			if err := afero.WriteFile(fs, imagePath, imageData, 0644); err != nil {
+				log.Warnf("Failed to write image for %q: %v", recipe.Slug, err)
+				continue
+			}
+			images[recipe.Slug] = imageFile
+			log.Debugf("Downloaded image for %q", recipe.Slug)
+		}
+
+		if err := mdProvider.WriteRecipes(fs, outputDir, recipes, images); err != nil {
 			return err
 		}
 

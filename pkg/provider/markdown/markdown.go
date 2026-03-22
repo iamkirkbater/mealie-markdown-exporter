@@ -18,7 +18,8 @@ import (
 var defaultTemplate string
 
 type TemplateData struct {
-	Recipe mealie.Recipe
+	Recipe    mealie.Recipe
+	ImagePath string
 }
 
 var funcMap = template.FuncMap{
@@ -80,14 +81,15 @@ func NewProvider(opts ...Option) (*Provider, error) {
 }
 
 // WriteRecipes renders each recipe as a markdown file and writes it to the output directory.
-func (p *Provider) WriteRecipes(fs afero.Fs, outputDir string, recipes []mealie.Recipe) error {
+// The images map contains slug -> image filename for recipes that have downloaded images.
+func (p *Provider) WriteRecipes(fs afero.Fs, outputDir string, recipes []mealie.Recipe, images map[string]string) error {
 	tmpl, err := template.New("recipe").Funcs(funcMap).Parse(p.templateContent)
 	if err != nil {
 		return fmt.Errorf("failed to parse template: %w", err)
 	}
 
 	for _, recipe := range recipes {
-		if err := writeRecipe(fs, tmpl, outputDir, recipe); err != nil {
+		if err := writeRecipe(fs, tmpl, outputDir, recipe, images[recipe.Slug]); err != nil {
 			log.Errorf("Failed to write recipe %q: %v", recipe.Slug, err)
 			return err
 		}
@@ -96,8 +98,8 @@ func (p *Provider) WriteRecipes(fs afero.Fs, outputDir string, recipes []mealie.
 	return nil
 }
 
-func writeRecipe(fs afero.Fs, tmpl *template.Template, outputDir string, recipe mealie.Recipe) error {
-	data := TemplateData{Recipe: recipe}
+func writeRecipe(fs afero.Fs, tmpl *template.Template, outputDir string, recipe mealie.Recipe, imagePath string) error {
+	data := TemplateData{Recipe: recipe, ImagePath: imagePath}
 
 	var buf bytes.Buffer
 	if err := tmpl.Execute(&buf, data); err != nil {
