@@ -10,6 +10,8 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+const perPage = 50
+
 type Client struct {
 	baseURL    string
 	apiToken   string
@@ -129,16 +131,18 @@ func (c *Client) GetAllRecipes() ([]Recipe, error) {
 			return nil, fmt.Errorf("failed to fetch recipes page %d: %w", page, err)
 		}
 
-		// if there's only one page resp.TotalPages is 0 so we explicitly set it here for log output
-		// otherwise it says "fetched page 1/0" which is confusing.
-		if resp.TotalPages == 0 {
-			resp.TotalPages = 1
-		}
+		log.Debugf("Response: page=%d, perPage=%d, total=%d, totalPages=%d, items=%d",
+			resp.Page, resp.PerPage, resp.Total, resp.TotalPages, len(resp.Items))
 
 		allRecipes = append(allRecipes, resp.Items...)
-		log.Debugf("Fetched page %d/%d (%d recipes)...", resp.Page, resp.TotalPages, len(resp.Items))
 
-		if page >= resp.TotalPages {
+		totalPages := (resp.Total + perPage - 1) / perPage
+		if totalPages == 0 {
+			totalPages = 1
+		}
+		log.Debugf("Fetched page %d/%d (%d recipes)...", page, totalPages, len(resp.Items))
+
+		if page >= totalPages {
 			break
 		}
 		page++
@@ -212,7 +216,7 @@ func (c *Client) GetRecipeImage(recipeID string) ([]byte, error) {
 }
 
 func (c *Client) getRecipesPage(page int) (*PaginatedResponse, error) {
-	url := fmt.Sprintf("%s/api/recipes?page=%d&perPage=50", c.baseURL, page)
+	url := fmt.Sprintf("%s/api/recipes?page=%d&perPage=%d", c.baseURL, page, perPage)
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {

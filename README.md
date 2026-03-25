@@ -2,6 +2,12 @@
 
 A CLI tool that exports recipes from a [Mealie](https://mealie.io) instance as markdown files with YAML front matter.
 
+## Problem Definition
+
+I'm a software engineer by trade. I primarily work with AWS, but I have a lab in my home network. On this, I host Mealie. I love Mealie so far, but in my weight-loss journey I'm finding a bunch of great recipes on Instagram and Facebook, but these aren't always friendly to be scraped by macro-trackers like MyFitnessPal, or MacroTracker, etc. Mealie does a pretty decent job of scraping the recipe from IG 99% of the time, which is great - but because I don't want to expose this application from my home network to the internet at large - I still can't scrape the recipe with MyFitnessPal.
+
+This is where this tool comes in. Because Mealie has a well-documented API backing it - I can do all of my recipe management in Mealie and then run this tool to exfill all of the recipes in a Markdown format. Then, I'm using `hugo` to build these rendered markdown files into a static website - which can then be published to Netlify or Github Pages or something. Now I have a freely-hosted static website with the same backing-data as my server that's available on the public internet without poking ANY holes into my local network. Secure _and_ free :D
+
 ## Installation
 
 ```sh
